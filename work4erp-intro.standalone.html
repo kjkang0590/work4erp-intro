@@ -1,0 +1,889 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}</style>
+<title>WORK4ERP 소개</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+  /* 레이아웃: 16:9 발표 슬라이드. 왼쪽 설명 + 오른쪽 반복 재생 데모. 기본(리셋 전) 상태는 시작 장면, 모션 줄이기 설정이면 마지막 장면을 보여 줌 */
+  :root {
+    --bg: #eef2f5;
+    --surface: #ffffff;
+    --surface-2: #e7edf1;
+    --fg: #14212b;
+    --muted: #55656f;
+    --line: #d0dae1;
+    --accent: #0b7a85;
+    --accent-soft: #d9eef0;
+    --old: #8a5a1f;
+    --old-soft: #f3e8d6;
+    --sel: #c9e6e9;
+    --ok: #1c7d49;
+    --bad: #b3372b;
+    --bad-soft: #f6dedb;
+    --hl: #e8590c;
+    --hl-soft: rgba(232, 89, 12, .22);
+    --font-body: "IBM Plex Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, "Consolas", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0b1217; --surface: #131e26; --surface-2: #1c2a34; --fg: #e6edf1; --muted: #9bacb6; --line: #2a3a45;
+      --accent: #4cc3cf; --accent-soft: #14383d; --old: #e0b576; --old-soft: #3a2f1c; --sel: #1b4a50;
+      --ok: #5fcf8d; --bad: #f08a7e; --bad-soft: #43201c; --hl: #ff8a4c; --hl-soft: rgba(255, 138, 76, .25); color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0b1217; --surface: #131e26; --surface-2: #1c2a34; --fg: #e6edf1; --muted: #9bacb6; --line: #2a3a45;
+    --accent: #4cc3cf; --accent-soft: #14383d; --old: #e0b576; --old-soft: #3a2f1c; --sel: #1b4a50;
+    --ok: #5fcf8d; --bad: #f08a7e; --bad-soft: #43201c; --hl: #ff8a4c; --hl-soft: rgba(255, 138, 76, .25); color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { background: var(--bg); color: var(--fg); font-family: var(--font-body); padding-inline: 16px; line-height: 1.55; }
+  h1, h2, h3, h4, p { margin: 0; }
+  h2, h3 { text-wrap: balance; }
+  button { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .app { min-height: 100%; display: flex; flex-direction: column; justify-content: center; padding-block: 12px; }
+  .col { width: min(100%, 1200px, calc((100svh - 130px) * 16 / 9)); margin-inline: auto; display: grid; gap: 10px; }
+  .bar, .ctl { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 13px; color: var(--muted); }
+  .bar .brand { font-weight: 700; color: var(--fg); letter-spacing: .02em; }
+  .bar .brand b { color: var(--accent); }
+  .bar .sec { font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em; text-align: right; }
+  .prog { height: 3px; background: var(--line); border-radius: 2px; overflow: hidden; }
+  .prog i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+  .btns { display: flex; gap: 8px; align-items: center; }
+  .btn { border: 1px solid var(--line); background: var(--surface); border-radius: 6px; padding: 6px 14px; cursor: pointer; font-size: 14px; }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn[disabled] { opacity: .4; cursor: default; }
+  .count { font-family: var(--font-mono); font-size: 13px; min-width: 5em; text-align: center; }
+  .hint { font-size: 12px; }
+
+  .stage { position: relative; aspect-ratio: 16 / 9; container-type: inline-size; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; touch-action: pan-y; }
+  .slide { display: none; position: absolute; inset: 0; padding: 3em 4em; font-size: clamp(11px, 1.55cqw, 20px); overflow: auto; align-content: center; }
+  .slide.active { display: grid; animation: slidein .35s ease both; }
+  @keyframes slidein { from { opacity: 0; transform: translateX(1.5%); } to { opacity: 1; transform: none; } }
+
+  .split { grid-template-columns: minmax(0, .8fr) minmax(0, 1.4fr); gap: 3em; align-items: center; }
+  .kicker { font-family: var(--font-mono); font-size: .8em; letter-spacing: .1em; color: var(--accent); text-transform: uppercase; margin-bottom: 1em; }
+  .slide h2 { font-size: 2.3em; font-weight: 700; line-height: 1.2; letter-spacing: -.01em; }
+  .lead { margin-top: 1.1em; font-size: 1.1em; color: var(--muted); max-width: 30em; }
+  .vsline { margin-top: 1.4em; display: grid; gap: .5em; font-size: 1em; }
+  .vsline div { padding: .55em .9em; border-radius: .4em; }
+  .vsline .was { background: var(--old-soft); color: var(--old); }
+  .vsline .now { background: var(--accent-soft); font-weight: 600; }
+  .vsline small { font-family: var(--font-mono); font-size: .75em; letter-spacing: .08em; margin-right: .6em; opacity: .85; }
+  .note { margin-top: .9em; font-size: .75em; color: var(--muted); }
+
+  /* 표지 */
+  .cover { grid-template-columns: minmax(0, 1fr); align-content: center; }
+  .cover::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 3em 3em; mask-image: radial-gradient(ellipse at 85% 30%, #000 0%, transparent 60%); -webkit-mask-image: radial-gradient(ellipse at 85% 30%, #000 0%, transparent 60%); opacity: .7; }
+  .cover > * { position: relative; }
+  .cover h1 { font-size: 6.4em; font-weight: 700; letter-spacing: -.03em; line-height: 1; }
+  .cover h1 b { color: var(--accent); }
+  .cover .sub { margin-top: .5em; font-size: 1.7em; font-weight: 500; max-width: 20em; text-wrap: balance; }
+  .cover .who { margin-top: 1.6em; color: var(--muted); font-size: 1em; }
+  .chips { display: flex; flex-wrap: wrap; gap: .6em; margin-top: 2em; }
+  .chip { padding: .3em 1em; border: 1px solid var(--line); border-radius: 999px; font-size: .9em; background: var(--surface); color: var(--muted); }
+  .chip.on { background: var(--accent-soft); color: var(--accent); border-color: transparent; font-weight: 600; }
+
+  /* 공통 데모 */
+  .demo { min-width: 0; }
+  .win { border: 1px solid var(--line); border-radius: .7em; overflow: hidden; background: var(--bg); box-shadow: 0 .6em 1.8em rgba(0,0,0,.08); }
+  .tb { display: flex; gap: .4em; align-items: center; padding: .55em .9em; background: var(--surface-2); border-bottom: 1px solid var(--line); }
+  .tb i { width: .65em; height: .65em; border-radius: 50%; background: var(--line); }
+  .tb span { margin-left: .6em; font-size: .8em; color: var(--muted); }
+  .wb { padding: 1.1em; position: relative; }
+
+  /* 1. 라이선스 */
+  .lic { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.2em; }
+  .panel { border: 1px solid var(--line); border-radius: .7em; padding: 1.1em; background: var(--bg); position: relative; display: grid; gap: .9em; align-content: start; }
+  .panel h4 { font-size: 1.15em; }
+  .panel h4 small { display: block; font-weight: 400; color: var(--muted); font-size: .72em; margin-top: .2em; }
+  .seats, .users { display: grid; grid-template-columns: repeat(5, 1fr); gap: .5em; }
+  .seat, .u { aspect-ratio: 1; border-radius: 50%; border: 2px dashed var(--line); transition: all .25s; }
+  .seat.on { background: var(--old); border: 2px solid var(--old); }
+  .u.on { background: var(--accent); border: 2px solid var(--accent); }
+  .blocked, .okmsg { font-size: .85em; padding: .6em .8em; border-radius: .4em; opacity: 0; transform: translateY(.4em); transition: all .3s; }
+  .blocked { background: var(--bad-soft); color: var(--bad); font-weight: 600; }
+  .okmsg { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  .blocked.on, .okmsg.on { opacity: 1; transform: none; }
+
+  /* 흐름 */
+  .flow { display: grid; gap: 1.6em; }
+  .flowrow { display: grid; grid-template-columns: minmax(0, 1fr) 3.2em minmax(0, 1fr) 3.2em minmax(0, 1fr); align-items: center; }
+  .node { border: 2px solid var(--line); border-radius: .6em; padding: .9em .6em; text-align: center; font-weight: 600; background: var(--bg); transition: all .3s; }
+  .node small { display: block; font-weight: 400; color: var(--muted); font-size: .75em; margin-top: .15em; }
+  .node.on { border-color: var(--accent); background: var(--accent-soft); }
+  .node.old.on { border-color: var(--old); background: var(--old-soft); }
+  .arrow { position: relative; height: 1.4em; }
+  .arrow::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; border-top: 2px dashed var(--line); }
+  .arrow b { position: absolute; left: 0; top: 50%; width: .9em; height: .9em; margin-top: -.45em; border-radius: 50%; background: var(--accent); opacity: 0; }
+  .arrow.go b { animation: fwd .8s forwards; }
+  .arrow.back b { animation: bwd .8s forwards; background: var(--ok); }
+  @keyframes fwd { 0% { left: 0; opacity: 1; } 85% { opacity: 1; } 100% { left: calc(100% - .9em); opacity: 0; } }
+  @keyframes bwd { 0% { left: calc(100% - .9em); opacity: 1; } 85% { opacity: 1; } 100% { left: 0; opacity: 0; } }
+  .result { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: .8em; align-items: center; opacity: 0; transform: translateY(.5em); transition: all .4s; }
+  .result.on { opacity: 1; transform: none; }
+  .rbox { border: 1px solid var(--line); border-radius: .5em; padding: .7em 1em; background: var(--surface); font-size: .9em; }
+  .rbox small { display: block; color: var(--muted); font-size: .8em; }
+  .rbox b { font-family: var(--font-mono); font-weight: 500; font-size: 1.1em; }
+  .eq { font-size: 1.6em; color: var(--ok); font-weight: 700; }
+  .rowlabel { font-family: var(--font-mono); font-size: .75em; letter-spacing: .08em; color: var(--muted); margin-bottom: .5em; }
+
+  /* 3. 기기 */
+  .devs { display: grid; grid-template-columns: 1.15fr 1.15fr .6fr; gap: 1.2em; align-items: end; }
+  .dev { border: 1px solid var(--line); border-radius: .7em; background: var(--bg); padding: .9em; display: grid; gap: .6em; transition: all .5s; }
+  .dev h4 { font-size: .95em; }
+  .dev h4 small { display: block; color: var(--muted); font-weight: 400; font-size: .78em; }
+  .dev .lines i { display: block; height: .6em; border-radius: .3em; background: var(--surface-2); margin-top: .45em; }
+  .dev .lines i:nth-child(2) { width: 80%; } .dev .lines i:nth-child(3) { width: 60%; } .dev .lines i:nth-child(4) { width: 90%; }
+  .dev.pc { opacity: .75; } .dev.pc h4 { color: var(--old); }
+  .dev.pc .lines i { background: var(--old-soft); }
+  .dev.br h4, .dev.ph h4 { color: var(--accent); }
+  .dev.br .lines i, .dev.ph .lines i { background: var(--accent-soft); }
+  .dev.ph { border-radius: 1.2em; padding-block: 1.4em; }
+  .dev.br:not(.show), .dev.ph:not(.show) { opacity: 0; transform: translateY(1em); }
+  .dev .lock { font-size: .75em; color: var(--old); font-family: var(--font-mono); }
+
+  /* 허브 */
+  .hub { border: 2px dashed var(--line); border-radius: .9em; padding: 1.2em; display: grid; gap: .8em; transition: border-color .6s; position: relative; }
+  .hub.joined { border-color: var(--accent); border-style: solid; }
+  .hubname { font-family: var(--font-mono); font-size: .8em; letter-spacing: .1em; color: var(--accent); }
+  .tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .8em; }
+  .tile { border: 1px solid var(--line); border-radius: .5em; padding: 1.1em .6em; text-align: center; font-weight: 600; background: var(--surface); transform: translate(var(--x), var(--y)) rotate(var(--r)); transition: transform 1s cubic-bezier(.2,.8,.2,1) calc(var(--i) * 90ms), background .6s, border-color .6s; }
+  .joined .tile { transform: none; background: var(--accent-soft); border-color: transparent; }
+
+  /* 카테고리 · 화면 */
+  .cats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.2em; }
+  .cat { border: 1px solid var(--line); border-radius: .7em; padding: 1.4em; background: var(--bg); opacity: .25; transform: translateY(.6em); transition: all .5s; display: grid; gap: .5em; align-content: start; }
+  .cat.on { opacity: 1; transform: none; }
+  .cat.soon { border-style: dashed; }
+  .cat .st { font-family: var(--font-mono); font-size: .75em; color: var(--accent); letter-spacing: .08em; }
+  .cat.soon .st { color: var(--muted); }
+  .cat h3 { font-size: 1.4em; }
+  .cat p { color: var(--muted); font-size: .9em; }
+  .stack { display: grid; gap: 1.6em; min-width: 0; }
+
+  /* 2. UI/UX 실제 화면: 캡처를 순서대로 바꿔 보여주고 바뀐 곳에 강조 박스 */
+  .shotslide { grid-template-rows: auto minmax(0, 1fr) auto; gap: .9em; align-content: stretch; padding: 2.2em 3em 1.6em; }
+  .shothead { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: .8em 2em; }
+  .shothead .kicker { margin-bottom: .5em; }
+  .shothead h2 { font-size: 1.9em; }
+  .shothead .vsline { margin: 0; grid-template-columns: repeat(2, auto); font-size: .85em; }
+  .shotwrap { min-height: 0; container-type: size; display: flex; justify-content: center; align-items: center; }
+  .shot { position: relative; width: min(100cqw, 100cqh * var(--arn, 1.9875)); aspect-ratio: var(--ar, 1427 / 718); border: 1px solid var(--line); border-radius: .6em; overflow: hidden; background: #fff; box-shadow: 0 .6em 1.8em rgba(0,0,0,.1); }
+  .shot img { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity .5s; }
+  .shot img.on { opacity: 1; }
+  .hl { position: absolute; border: 3px solid var(--hl); border-radius: 6px; box-shadow: 0 0 0 4px var(--hl-soft); opacity: 0; transform: scale(1.06); transition: opacity .35s, transform .35s; pointer-events: none; }
+  .hl.on { opacity: 1; transform: none; }
+  .shotbar { display: flex; align-items: center; gap: 1em; min-height: 1.6em; }
+  .dots { display: flex; gap: .35em; flex: none; }
+  .dots i { width: .5em; height: .5em; border-radius: 999px; background: var(--line); transition: all .3s; }
+  .dots i.on { width: 1.5em; background: var(--hl); }
+  .cap { font-weight: 600; font-size: 1.05em; flex: 1; min-width: 0; }
+  .blurnote { font-size: .72em; color: var(--muted); flex: none; }
+
+  /* 제공 화면 1: 대시보드 4개를 2x2로 한 번에 */
+  .dash4slide { grid-template-rows: auto minmax(0, 1fr); gap: 1em; align-content: stretch; padding: 2.2em 3em 1.8em; }
+  .dash4 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: .9em 1.4em; min-height: 0; }
+  .dash4 figure { margin: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: .35em; min-height: 0; min-width: 0; }
+  .dash4 img { width: 100%; height: 100%; min-height: 0; object-fit: contain; object-position: center top; filter: drop-shadow(0 0 1px var(--line)) drop-shadow(0 .3em .8em rgba(0,0,0,.12)); }
+  .dash4 figcaption { font-size: .8em; color: var(--muted); text-align: center; }
+  .dash4 figcaption b { color: var(--fg); margin-right: .6em; }
+
+  /* 부록: 전체 화면 (슬라이드 안에서 세로 스크롤) */
+  .scrolly { align-content: start; padding: 2.4em 4em 4em; scroll-behavior: smooth; }
+  .allhead h2 { font-size: 2em; }
+  .allhead .lead { max-width: 46em; }
+  .alltoc { display: flex; flex-wrap: wrap; gap: .4em; margin-top: 1.2em; }
+  .alltoc a { font-size: .8em; padding: .25em .9em; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); text-decoration: none; }
+  .alltoc a:hover, .alltoc a:focus-visible { color: var(--accent); border-color: var(--accent); }
+  .alltoc a b { font-family: var(--font-mono); font-weight: 500; margin-left: .4em; color: var(--accent); }
+  .allgroup { margin-top: 2.6em; display: grid; gap: 1.8em; }
+  .allgroup > h3 { font-size: 1.35em; display: flex; gap: .6em; align-items: baseline; border-bottom: 1px solid var(--line); padding-bottom: .4em; }
+  .allgroup > h3 span { font-family: var(--font-mono); font-size: .62em; color: var(--accent); font-weight: 500; }
+  .pagecard { display: grid; gap: .55em; min-width: 0; }
+  .pagecard header { display: flex; flex-wrap: wrap; gap: .3em .8em; align-items: baseline; }
+  .pagecard .no { font-family: var(--font-mono); font-size: .78em; color: var(--accent); }
+  .pagecard b { font-size: 1.05em; }
+  .pagecard .sub { font-size: .75em; color: var(--muted); }
+  .pagecard code { font-family: var(--font-mono); font-size: .75em; color: var(--muted); }
+  .pagecard img { display: block; width: 100%; height: auto; aspect-ratio: 1520 / 783; border: 1px solid var(--line); border-radius: .5em; background: #fff; }
+
+  .notif { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, .7fr); gap: 1.2em; align-items: center; }
+  .evt { grid-column: 1 / -1; justify-self: start; font-size: .85em; padding: .4em 1em; border-radius: 999px; background: var(--old-soft); color: var(--old); opacity: 0; transition: opacity .3s; font-weight: 600; }
+  .evt.on { opacity: 1; }
+  .topbar { display: flex; justify-content: space-between; align-items: center; font-weight: 600; margin-bottom: .8em; }
+  .bell { position: relative; width: 1.6em; height: 1.6em; color: var(--muted); }
+  .bell svg { width: 100%; height: 100%; }
+  .badge { position: absolute; top: -.35em; right: -.45em; background: var(--bad); color: #fff; font-size: .65em; min-width: 1.6em; height: 1.6em; border-radius: 999px; display: grid; place-items: center; transform: scale(0); transition: transform .25s; }
+  .badge.on { transform: scale(1); }
+  .toast { position: absolute; right: 1em; top: 3.4em; background: var(--fg); color: var(--bg); padding: .7em 1em; border-radius: .5em; font-size: .85em; opacity: 0; transform: translateY(-.5em); transition: all .3s; max-width: 70%; z-index: 2; }
+  .toast.on { opacity: 1; transform: none; }
+  .nlist { border: 1px solid var(--line); border-radius: .5em; background: var(--surface); overflow: hidden; }
+  .nitem { padding: .8em 1em; font-size: .9em; border-bottom: 1px solid var(--line); display: flex; gap: .6em; align-items: center; transition: all .4s; max-height: 3.4em; }
+  .nitem.new { background: var(--accent-soft); font-weight: 600; }
+  .nitem.new.off { max-height: 0; padding-block: 0; opacity: 0; border: 0; }
+  .nitem i { width: .5em; height: .5em; border-radius: 50%; background: var(--accent); flex: none; }
+  .phone { border: 3px solid var(--line); border-radius: 1.4em; padding: 1.2em .6em; background: var(--bg); position: relative; min-height: 16em; overflow: hidden; }
+  .phone .banner { position: absolute; left: .5em; right: .5em; top: .6em; background: var(--fg); color: var(--bg); border-radius: .7em; padding: .7em .8em; font-size: .75em; transform: translateY(-140%); transition: transform .4s; z-index: 2; }
+  .phone .banner.on { transform: none; }
+  .phone .lines i { display: block; height: .6em; border-radius: .3em; background: var(--surface-2); margin-top: .7em; }
+  .phone .lines i:nth-child(2) { width: 70%; } .phone .lines i:nth-child(4) { width: 85%; }
+
+  /* 대시보드 카드 */
+  .dgrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1em; }
+  .dc { border: 1px solid var(--line); border-radius: .7em; padding: 1.1em; background: var(--bg); display: grid; gap: .6em; align-content: start; }
+  .dc h3 { font-size: 1.05em; }
+  .dc p { font-size: .8em; color: var(--muted); }
+  .bars { display: flex; align-items: flex-end; gap: .35em; height: 5em; }
+  .bars i { flex: 1; height: calc(var(--h) * 1%); background: var(--accent); border-radius: .2em .2em 0 0; transform: scaleY(.02); transform-origin: bottom; transition: transform .7s cubic-bezier(.2,.8,.2,1) calc(var(--k) * 70ms); }
+  .on .bars i { transform: none; }
+  .dc { opacity: .3; transition: opacity .4s; } .dc.on { opacity: 1; }
+  .mods { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .9em; }
+  .mod { border: 1px solid var(--line); border-radius: .7em; padding: 1em; background: var(--bg); opacity: .25; transform: translateY(.6em); transition: all .5s; display: grid; gap: .5em; align-content: start; }
+  .mod.on { opacity: 1; transform: none; }
+  .mod h3 { font-size: 1.05em; display: flex; justify-content: space-between; align-items: baseline; gap: .5em; }
+  .mod .n { font-family: var(--font-mono); font-size: .8em; color: var(--accent); background: var(--accent-soft); padding: .05em .6em; border-radius: 999px; }
+  .mod ul { margin: 0; padding: 0; list-style: none; font-size: .78em; color: var(--muted); display: grid; gap: .2em; }
+  .tiles9 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .8em; }
+  .t9 { border: 1px solid var(--line); border-radius: .6em; padding: .8em 1em; background: var(--bg); display: flex; justify-content: space-between; align-items: center; gap: .5em; font-weight: 600; opacity: .25; transform: translateY(.5em); transition: all .4s; font-size: .95em; }
+  .t9.on { opacity: 1; transform: none; }
+  .t9 small { font-weight: 400; font-size: .75em; color: var(--muted); font-family: var(--font-mono); white-space: nowrap; }
+  .total { display: flex; flex-wrap: wrap; gap: .4em 2em; font-size: .9em; color: var(--muted); }
+  .total b { color: var(--fg); font-family: var(--font-mono); font-weight: 500; }
+
+  .end { grid-template-columns: minmax(0, 1fr); }
+  .end h2 { font-size: 3.2em; }
+
+  /* 좁은 화면: 슬라이드 비율을 풀고 세로로 쌓는다 */
+  /* 휴대폰 세로(좁은 폭)와 가로(낮은 높이) 모두: 슬라이드 비율을 풀고 화면을 꽉 채운 뒤 슬라이드 안에서 세로 스크롤 */
+  @media (max-width: 760px), (max-height: 540px) {
+    .app { padding-block: 6px; }
+    .col { width: 100%; height: calc(100svh - 12px); grid-template-rows: auto minmax(0, 1fr) auto auto; gap: 6px; }
+    .stage { aspect-ratio: auto; min-height: 0; }
+    .slide { font-size: 14px; padding: 1.6em 1.3em; align-content: start; }
+    .split, .lic, .cats, .notif, .devs, .dgrid, .mods, .tiles9 { grid-template-columns: minmax(0, 1fr); }
+    .split { gap: 1.6em; }
+    .cover h1 { font-size: 3.4em; }
+    .cover .sub { font-size: 1.3em; }
+    .slide h2 { font-size: 1.7em; }
+    .end h2 { font-size: 2em; }
+    .shotslide { grid-template-rows: auto auto auto; padding: 1.6em 1.3em; }
+    .shothead .vsline { grid-template-columns: minmax(0, 1fr); }
+    .shotwrap { container-type: normal; }
+    .shot { width: 100%; }
+    .shotbar { flex-wrap: wrap; }
+    .scrolly { padding: 1.6em 1.3em 3em; }
+    .dash4slide { grid-template-rows: auto auto; padding: 1.6em 1.3em; }
+    .dash4 { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; }
+    .dash4 img { height: auto; }
+    .hint { display: none; }
+    .flowrow { grid-template-columns: minmax(0, 1fr) 1.6em minmax(0, 1fr) 1.6em minmax(0, 1fr); }
+    .node { font-size: .85em; padding-inline: .3em; }
+    .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  /* 휴대폰 가로: 높이가 낮으니 데스크톱처럼 여러 칸을 유지하고, 캡처는 화면 높이에 맞춘다 */
+  @media (max-height: 540px) and (orientation: landscape) {
+    .slide { font-size: 12px; padding: 1em 1.4em; }
+    .split { grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 1.4em; align-items: start; }
+    .lic { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .cats, .mods, .tiles9 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .devs { grid-template-columns: 1.15fr 1.15fr .6fr; }
+    .notif { grid-template-columns: minmax(0, 1.6fr) minmax(0, .7fr); }
+    .dash4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .cover h1 { font-size: 3.6em; }
+    .slide h2 { font-size: 1.6em; }
+    .shotslide { gap: .6em; }
+    .shotwrap { display: flex; justify-content: center; }
+    .shot { width: min(100%, calc((100svh - 190px) * var(--arn, 1.9875))); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .slide.active { animation: none; }
+    * { transition-duration: 0s !important; transition-delay: 0s !important; animation-duration: 0s !important; }
+  }
+</style>
+
+<div class="app">
+  <div class="col">
+    <div class="bar"><div class="brand">WORK<b>4</b>ERP</div><div class="sec" id="sec"></div></div>
+    <div class="stage" id="stage" role="region" aria-label="슬라이드" aria-live="polite">
+
+      <!-- 1 표지 -->
+      <section class="slide cover" id="s1" data-sec="표지">
+        <div class="kicker">프로젝트 소개 · 현업 사용자용</div>
+        <h1>WORK<b>4</b>ERP</h1>
+        <p class="sub">UNIERP를 웹과 모바일로, 라이선스 걱정 없이</p>
+        <div class="chips"><span class="chip on">Web4ERP</span><span class="chip on">Office Management</span><span class="chip">Mobile4ERP (예정)</span></div>
+      </section>
+
+      <!-- 2 라이선스 -->
+      <section class="slide split" id="s2" data-sec="도입 효과 1 / 5" data-scene="license">
+        <div>
+          <div class="kicker">도입 효과 1</div>
+          <h2>동시 접속자에<br>포함되지 않습니다</h2>
+          <p class="lead">WORK4ERP로 접속해도 UNIERP 동시 접속 라이선스를 쓰지 않습니다. 사용자가 몰려도 UNIERP 사용자가 밀려나지 않습니다.</p>
+        </div>
+        <div class="demo">
+          <div class="lic">
+            <div class="panel">
+              <h4>UNIERP<small>동시 로그인 10명까지</small></h4>
+              <div class="seats"><i class="seat"></i><i class="seat"></i><i class="seat"></i><i class="seat"></i><i class="seat"></i><i class="seat"></i><i class="seat"></i><i class="seat"></i><i class="seat"></i><i class="seat"></i></div>
+              <div class="blocked">11번째 사용자는 접속 대기</div>
+            </div>
+            <div class="panel">
+              <h4>WORK4ERP<small>로그인 수에 영향 없음</small></h4>
+              <div class="users"><i class="u"></i><i class="u"></i><i class="u"></i><i class="u"></i><i class="u"></i><i class="u"></i></div>
+              <div class="okmsg">모두 접속 중, UNIERP 로그인 수는 그대로</div>
+            </div>
+          </div>
+          <p class="note">10명은 설명을 위한 예시입니다.</p>
+        </div>
+      </section>
+
+      <!-- 3 비즈니스 로직 -->
+      <section class="slide split" id="s3" data-sec="도입 효과 2 / 5" data-scene="logic">
+        <div>
+          <div class="kicker">도입 효과 2</div>
+          <h2>UNIERP 로직을<br>직접 호출합니다</h2>
+          <p class="lead">화면만 새로 만들고, 조회와 처리는 UNIERP의 비즈니스 로직이 그대로 합니다. 그래서 결과가 UNIERP와 같습니다.</p>
+        </div>
+        <div class="demo flow">
+          <div class="flowrow">
+            <div class="node n1">WORK4ERP<small>웹 화면</small></div><div class="arrow a1"><b></b></div>
+            <div class="node n2 old">UNIERP<small>비즈니스 로직</small></div><div class="arrow a2"><b></b></div>
+            <div class="node n3">ERP DB<small>데이터</small></div>
+          </div>
+          <div class="result">
+            <div class="rbox"><small>UNIERP 화면</small>수주 <b>1,240</b>건</div>
+            <div class="eq">=</div>
+            <div class="rbox"><small>WORK4ERP 화면</small>수주 <b>1,240</b>건</div>
+          </div>
+          <p class="note" style="margin:0">수치는 예시입니다.</p>
+        </div>
+      </section>
+
+      <!-- 4 웹/모바일 -->
+      <section class="slide split" id="s4" data-sec="도입 효과 3 / 5" data-scene="devices">
+        <div>
+          <div class="kicker">도입 효과 3</div>
+          <h2>윈도우 밖에서도<br>그대로 씁니다</h2>
+          <p class="lead">UNIERP는 윈도우 전용 프로그램입니다. WORK4ERP는 설치 없이 웹 브라우저와 모바일에서 씁니다.</p>
+        </div>
+        <div class="demo devs">
+          <div class="dev pc"><h4>UNIERP<small>윈도우 전용 프로그램</small></h4><div class="lines"><i></i><i></i><i></i><i></i></div><div class="lock">설치 필요</div></div>
+          <div class="dev br"><h4>WORK4ERP<small>웹 브라우저</small></h4><div class="lines"><i></i><i></i><i></i><i></i></div></div>
+          <div class="dev ph"><h4>WORK4ERP<small>모바일</small></h4><div class="lines"><i></i><i></i><i></i></div></div>
+        </div>
+      </section>
+
+      <!-- 5 SSO -->
+      <section class="slide split" id="s5" data-sec="도입 효과 4 / 5" data-scene="sso">
+        <div>
+          <div class="kicker">도입 효과 4</div>
+          <h2>로그인은<br>UNIERP SSO로</h2>
+          <p class="lead">UNIERP 계정으로 한 번에 들어옵니다. UNIERP 계정이 없는 사용자에게는 WORK4ERP 전용 계정을 줄 수 있습니다.</p>
+        </div>
+        <div class="demo flow">
+          <div>
+            <div class="rowlabel">UNIERP 계정 사용자</div>
+            <div class="flowrow rowA">
+              <div class="node n1 old">UNIERP 계정</div><div class="arrow a1"><b></b></div>
+              <div class="node n2">UNIERP SSO<small>인증</small></div><div class="arrow a2"><b></b></div>
+              <div class="node n3">WORK4ERP<small>접속 완료</small></div>
+            </div>
+          </div>
+          <div>
+            <div class="rowlabel">WORK4ERP 전용 사용자</div>
+            <div class="flowrow rowB">
+              <div class="node n1">전용 계정</div><div class="arrow a1"><b></b></div>
+              <div class="node n2">WORK4ERP<small>인증</small></div><div class="arrow a2"><b></b></div>
+              <div class="node n3">WORK4ERP<small>접속 완료</small></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6 통합 -->
+      <section class="slide split" id="s6" data-sec="도입 효과 5 / 5" data-scene="hub">
+        <div>
+          <div class="kicker">도입 효과 5</div>
+          <h2>흩어진 시스템을<br>한곳으로</h2>
+          <p class="lead">따로 쓰던 업무 화면과 시스템을 WORK4ERP 메뉴로 모아 한 번 로그인으로 씁니다.</p>
+        </div>
+        <div class="demo">
+          <div class="hub">
+            <div class="hubname">WORK4ERP</div>
+            <div class="tiles">
+              <div class="tile" style="--i:0;--x:-9em;--y:-4em;--r:-6deg">ERP 업무 화면</div>
+              <div class="tile" style="--i:1;--x:2em;--y:-6em;--r:5deg">사무 신청</div>
+              <div class="tile" style="--i:2;--x:9em;--y:-3em;--r:-4deg">대시보드</div>
+              <div class="tile" style="--i:3;--x:-8em;--y:5em;--r:7deg">알림</div>
+              <div class="tile" style="--i:4;--x:3em;--y:6em;--r:-5deg">기타 시스템</div>
+              <div class="tile" style="--i:5;--x:10em;--y:4em;--r:4deg">추가 예정</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7 카테고리 -->
+      <section class="slide" id="s7" data-sec="카테고리" data-scene="cats">
+        <div class="stack">
+          <div>
+            <div class="kicker">카테고리</div>
+            <h2>업무 성격에 따라<br>세 갈래로 나눕니다</h2>
+          </div>
+          <div class="cats">
+            <div class="cat"><div class="st">제공 중</div><h3>Web4ERP</h3><p>UNIERP의 영업, 구매, 재고, 생산, 기준정보 화면을 웹으로 옮겼습니다.</p></div>
+            <div class="cat"><div class="st">제공 중</div><h3>Office Management</h3><p>사원증, 근무복, 차량, 방문객 같은 사무 신청과 처리를 한곳에서 합니다.</p></div>
+            <div class="cat soon"><div class="st">예정</div><h3>Mobile4ERP</h3><p>모바일에서 바로 쓰는 업무 화면을 준비하고 있습니다.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 8 검색 (실제 화면) -->
+      <section class="slide shotslide" id="s8" data-sec="UI/UX 개선 1 / 6" data-scene="shots" data-frames='[
+        {"src":"shots/search-1.jpg","cap":"조회조건 칸 대신 검색창 하나","box":[[24,178,618,34]]},
+        {"src":"shots/search-2.jpg","cap":"‘FSP’만 입력하면 117건이 27건으로 바로 줄어듭니다","box":[[24,178,618,34],[1050,666,100,24]]}
+      ]'>
+        <div class="shothead">
+          <div><div class="kicker">UI/UX 개선 1 · 수주현황조회</div><h2>조회조건은 검색 하나로</h2></div>
+          <div class="vsline"><div class="was"><small>UNIERP</small>조건 칸을 하나씩 채워서 조회</div><div class="now"><small>WORK4ERP</small>검색창에 입력하면 바로 조회</div></div>
+        </div>
+        <div class="shotwrap"><div class="shot"></div></div>
+        <div class="shotbar"><div class="dots"></div><p class="cap"></p><span class="blurnote">민감한 값은 흐림 처리</span></div>
+      </section>
+
+      <!-- 9 필터 행 (실제 화면) -->
+      <section class="slide shotslide" id="s9" data-sec="UI/UX 개선 2 / 6" data-scene="shots" data-frames='[
+        {"src":"shots/search-1.jpg","cap":"모든 컬럼 머리글 아래에 필터 칸이 있습니다","box":[[80,256,1320,32]]},
+        {"src":"shots/filter-2.jpg","cap":"수주일에 ‘2026-07’ 입력 → 117건이 17건으로","box":[[778,256,136,32],[1050,666,100,24]]},
+        {"src":"shots/filter-3.jpg","cap":"수주번호 필터를 더하면 → 4건","box":[[778,256,136,32],[1198,256,136,32],[1070,666,82,24]]}
+      ]'>
+        <div class="shothead">
+          <div><div class="kicker">UI/UX 개선 2 · 수주현황조회</div><h2>그리드 필터 행</h2></div>
+          <div class="vsline"><div class="was"><small>UNIERP</small>조건을 바꾸려면 다시 조회</div><div class="now"><small>WORK4ERP</small>컬럼 아래 칸에 입력하면 바로 걸러짐</div></div>
+        </div>
+        <div class="shotwrap"><div class="shot"></div></div>
+        <div class="shotbar"><div class="dots"></div><p class="cap"></p><span class="blurnote">민감한 값은 흐림 처리</span></div>
+      </section>
+
+      <!-- 10 자동 채우기 (실제 화면) -->
+      <section class="slide shotslide" id="s10" data-sec="UI/UX 개선 3 / 6" data-scene="shots" data-frames='[
+        {"src":"shots/fill-1.jpg","cap":"셀을 선택하면 오른쪽 아래에 채우기 핸들이 생깁니다","box":[[1122,411,182,28]]},
+        {"src":"shots/fill-2.jpg","cap":"핸들을 아래로 끌면 같은 값이 채워지고, 변경 건수가 표시됩니다","box":[[1122,411,182,168],[824,221,62,24]]}
+      ]'>
+        <div class="shothead">
+          <div><div class="kicker">UI/UX 개선 3 · 품목정보등록(Multi)</div><h2>엑셀처럼 셀 자동 채우기</h2></div>
+          <div class="vsline"><div class="was"><small>UNIERP</small>같은 값을 행마다 입력</div><div class="now"><small>WORK4ERP</small>셀 모서리를 끌어 아래로 채움</div></div>
+        </div>
+        <div class="shotwrap"><div class="shot"></div></div>
+        <div class="shotbar"><div class="dots"></div><p class="cap"></p><span class="blurnote">민감한 값은 흐림 처리</span></div>
+      </section>
+
+      <!-- 11 등록 화면 필터·그룹 (실제 화면) -->
+      <section class="slide shotslide" id="s11" data-sec="UI/UX 개선 4 / 6" data-scene="shots" data-frames='[
+        {"src":"shots/group-1.jpg","cap":"등록 화면에서도 필터 행으로 259건을 31건으로 거릅니다","box":[[96,296,112,28],[1060,666,92,24]]},
+        {"src":"shots/group-2.jpg","cap":"‘그룹 추가’에서 묶을 컬럼을 고릅니다","box":[[1202,218,100,28],[1180,480,142,26]]},
+        {"src":"shots/group-3.jpg","cap":"품목그룹별로 묶이고 그룹마다 건수가 표시됩니다","box":[[375,330,138,108],[1050,221,98,24]]},
+        {"src":"shots/group-4.jpg","cap":"그룹을 펼치면 해당 품목만 보입니다","box":[[375,356,138,26],[92,384,120,222]]}
+      ]'>
+        <div class="shothead">
+          <div><div class="kicker">UI/UX 개선 4 · 품목정보등록(Multi)</div><h2>등록 화면에서도 필터와 그룹</h2></div>
+          <div class="vsline"><div class="was"><small>UNIERP</small>등록 화면에서는 필터·그룹 불가</div><div class="now"><small>WORK4ERP</small>등록 화면도 조회 화면과 같은 그리드</div></div>
+        </div>
+        <div class="shotwrap"><div class="shot"></div></div>
+        <div class="shotbar"><div class="dots"></div><p class="cap"></p><span class="blurnote">민감한 값은 흐림 처리</span></div>
+      </section>
+
+      <!-- 12 선택 셀 요약 (실제 화면) -->
+      <section class="slide shotslide" id="s12" data-sec="UI/UX 개선 5 / 6" data-scene="shots" data-frames='[
+        {"src":"shots/summary-1.jpg","cap":"셀 2개를 선택하면 하단에 개수, 합계, 평균, 최소, 최대","box":[[918,289,140,57],[30,664,500,26]]},
+        {"src":"shots/summary-2.jpg","cap":"4개로 늘리면 바로 다시 계산됩니다","box":[[918,289,140,113],[30,664,500,26]]},
+        {"src":"shots/summary-3.jpg","cap":"6개, 계산기를 따로 켤 필요가 없습니다","box":[[918,289,140,169],[30,664,500,26]]}
+      ]'>
+        <div class="shothead">
+          <div><div class="kicker">UI/UX 개선 5 · 수주현황조회</div><h2>선택한 셀의 요약 정보</h2></div>
+          <div class="vsline"><div class="was"><small>UNIERP</small>합계를 보려면 따로 계산</div><div class="now"><small>WORK4ERP</small>셀을 선택하면 하단에 바로 표시</div></div>
+        </div>
+        <div class="shotwrap"><div class="shot"></div></div>
+        <div class="shotbar"><div class="dots"></div><p class="cap"></p><span class="blurnote">민감한 값은 흐림 처리</span></div>
+      </section>
+
+      <!-- 13 알림 -->
+      <section class="slide split" id="s13" data-sec="UI/UX 개선 6 / 6" data-scene="notify">
+        <div>
+          <div class="kicker">UI/UX 개선 6</div>
+          <h2>웹과 모바일<br>알림</h2>
+          <div class="vsline"><div class="was"><small>UNIERP</small>처리 상황을 직접 찾아가서 확인</div><div class="now"><small>WORK4ERP</small>신청이 접수되면 웹과 모바일로 알림</div></div>
+        </div>
+        <div class="demo notif">
+          <div class="evt">근무복 신청 접수</div>
+          <div class="win">
+            <div class="tb"><i></i><i></i><i></i><span>웹</span></div>
+            <div class="wb" style="min-height:14em">
+              <div class="topbar"><span>WORK4ERP</span><span class="bell"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg><b class="badge">1</b></span></div>
+              <div class="toast">새 알림 · 근무복 신청이 접수되었습니다</div>
+              <div class="nlist">
+                <div class="nitem new off"><i></i>근무복 신청이 접수되었습니다</div>
+                <div class="nitem"><i style="background:var(--line)"></i>회의실 예약이 승인되었습니다</div>
+                <div class="nitem" style="border:0"><i style="background:var(--line)"></i>외부 방문객 신청이 처리되었습니다</div>
+              </div>
+            </div>
+          </div>
+          <div class="phone"><div class="banner">WORK4ERP · 근무복 신청이 접수되었습니다</div><div class="lines" style="margin-top:3em"><i></i><i></i><i></i><i></i></div></div>
+        </div>
+      </section>
+
+      <!-- 14 대시보드 -->
+      <section class="slide dash4slide" id="s14" data-sec="제공 화면 · 대시보드">
+        <div class="shothead">
+          <div><div class="kicker">제공 화면 1 · 대시보드 4개</div><h2>숫자는 한눈에, 마감은 한곳에서</h2></div>
+          <span class="blurnote">금액은 흐림 처리</span>
+        </div>
+        <div class="dash4">
+          <figure><img src="pages/08-dash-closing.jpg" alt="재고마감 대시보드 화면"><figcaption><b>재고마감 대시보드</b>마감 전 미결 업무 확인, 마감 실행·취소</figcaption></figure>
+          <figure><img src="pages/09-dash-cancel.jpg" alt="재고마감 취소요청 이력 화면"><figcaption><b>재고마감 취소요청 이력</b>취소 요청의 승인, 반려 이력</figcaption></figure>
+          <figure><img src="pages/10-dash-sales.jpg" alt="영업 대시보드 화면"><figcaption><b>영업 대시보드</b>수주·출하·통관 KPI, 월별 수주·매출 추이</figcaption></figure>
+          <figure><img src="pages/11-dash-purchase.jpg" alt="구매 대시보드 화면"><figcaption><b>구매 대시보드</b>발주·입고·통관 KPI, 월별 발주·매입 추이</figcaption></figure>
+        </div>
+      </section>
+
+      <!-- 15 Web4ERP -->
+      <section class="slide" id="s15" data-sec="제공 화면 · Web4ERP" data-scene="mods">
+        <div class="stack">
+          <div>
+            <div class="kicker">제공 화면 2 · Web4ERP 30개</div>
+            <h2>UNIERP 업무 화면을<br>모듈별로 옮겼습니다</h2>
+          </div>
+          <div class="mods">
+            <div class="mod"><h3>기준정보<span class="n">2</span></h3><ul><li>품목기준정보</li></ul></div>
+            <div class="mod"><h3>재고관리<span class="n">3</span></h3><ul><li>수불정보</li><li>재고현황</li></ul></div>
+            <div class="mod"><h3>영업관리<span class="n">9</span></h3><ul><li>수주정보</li><li>출하정보</li><li>매출채권정보</li></ul></div>
+            <div class="mod"><h3>생산관리<span class="n">4</span></h3><ul><li>제조오더정보</li></ul></div>
+            <div class="mod"><h3>구매관리<span class="n">12</span></h3><ul><li>구매요청정보</li><li>발주정보</li><li>구매입출고정보</li><li>매입정보</li></ul></div>
+          </div>
+          <p class="note" style="margin:0">화면 코드는 UNIERP와 같아서 기존 화면과 쉽게 짝을 맞출 수 있습니다.</p>
+        </div>
+      </section>
+
+      <!-- 16 OM -->
+      <section class="slide" id="s16" data-sec="제공 화면 · Office Management" data-scene="om">
+        <div class="stack">
+          <div>
+            <div class="kicker">제공 화면 3 · Office Management 17개</div>
+            <h2>사무 신청은<br>신청과 관리를 한 쌍으로</h2>
+          </div>
+          <div class="tiles9">
+            <div class="t9">사원증 발급<small>신청·관리</small></div>
+            <div class="t9">회의실 예약<small>신청</small></div>
+            <div class="t9">근무복<small>신청·관리</small></div>
+            <div class="t9">차량등록<small>신청·관리</small></div>
+            <div class="t9">외부 방문객<small>신청·관리</small></div>
+            <div class="t9">명함<small>신청·관리</small></div>
+            <div class="t9">사무소모품<small>신청·관리</small></div>
+            <div class="t9">영선(비품수선)<small>신청·관리</small></div>
+            <div class="t9">축구 티켓<small>신청·관리</small></div>
+          </div>
+          <p class="note" style="margin:0">신청 화면은 일반 사용자, 관리 화면은 담당자가 사용합니다.</p>
+        </div>
+      </section>
+
+      <!-- 17 마무리 -->
+      <section class="slide cover end" id="s17" data-sec="마무리">
+        <div class="kicker">WORK4ERP</div>
+        <h2>필요한 화면은<br>계속 늘어납니다</h2>
+        <p class="sub" style="font-size:1.2em;color:var(--muted)">필요한 화면이 있으면 담당자에게 알려 주세요.</p>
+        <div class="chips"><span class="chip on">Web4ERP</span><span class="chip on">Office Management</span><span class="chip">Mobile4ERP (예정)</span></div>
+        <p class="note" style="margin-top:2em">다음 페이지에서 로그인부터 모든 화면을 차례로 볼 수 있습니다.</p>
+      </section>
+
+      <!-- 18 전체 화면 (스크롤) -->
+      <section class="slide scrolly" id="s18" data-sec="부록 · 전체 화면">
+        <div class="allhead">
+          <div class="kicker">부록 · 전체 화면 61개</div>
+          <h2>로그인부터 모든 화면</h2>
+          <p class="lead">메뉴 순서대로 정리했습니다. 아래로 스크롤하세요. 거래처, 품목명, 금액, 이름 같은 값은 흐리게 처리했습니다.</p>
+          <nav class="alltoc" id="alltoc" aria-label="전체 화면 목차"></nav>
+        </div>
+        <div id="allpages"></div>
+      </section>
+    </div>
+
+    <div class="prog"><i id="prog"></i></div>
+    <div class="ctl">
+      <span class="hint">← → 키 또는 화면을 옆으로 밀어서 이동</span>
+      <div class="btns">
+        <button class="btn" id="prev" type="button" aria-label="이전 슬라이드">이전</button>
+        <span class="count" id="count"></span>
+        <button class="btn" id="next" type="button" aria-label="다음 슬라이드">다음</button>
+        <button class="btn" id="full" type="button">전체화면</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var stage = document.getElementById('stage');
+  var cur = -1, timers = [];
+  var reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function at(ms, fn) { timers.push(setTimeout(fn, ms)); }
+  function stop() { timers.forEach(clearTimeout); timers = []; }
+  function qa(r, s) { return Array.prototype.slice.call(r.querySelectorAll(s)); }
+  function q(r, s) { return r.querySelector(s); }
+  function all(r, s, cls, on) { qa(r, s).forEach(function (e) { e.classList.toggle(cls, on); }); }
+  function chain(row, t0) {
+    var n = qa(row, '.node'), a = qa(row, '.arrow');
+    at(t0, function () { n[0].classList.add('on'); });
+    at(t0 + 400, function () { a[0].classList.add('go'); });
+    at(t0 + 1200, function () { n[1].classList.add('on'); });
+    at(t0 + 1600, function () { a[1].classList.add('go'); });
+    at(t0 + 2500, function () { n[2].classList.add('on'); });
+  }
+  function chainClear(r) { all(r, '.node', 'on', false); all(r, '.arrow', 'go', false); all(r, '.arrow', 'back', false); }
+
+  var scenes = {
+    license: {
+      period: 8800,
+      reset: function (r) { all(r, '.seat', 'on', false); all(r, '.u', 'on', false); all(r, '.blocked', 'on', false); all(r, '.okmsg', 'on', false); },
+      play: function (r) {
+        qa(r, '.seat').forEach(function (e, i) { at(300 + i * 220, function () { e.classList.add('on'); }); });
+        at(3000, function () { q(r, '.blocked').classList.add('on'); });
+        qa(r, '.u').forEach(function (e, i) { at(3800 + i * 350, function () { e.classList.add('on'); }); });
+        at(6000, function () { q(r, '.okmsg').classList.add('on'); });
+      },
+      final: function (r) { all(r, '.seat', 'on', true); all(r, '.u', 'on', true); all(r, '.blocked', 'on', true); all(r, '.okmsg', 'on', true); }
+    },
+    logic: {
+      period: 8500,
+      reset: function (r) { chainClear(r); all(r, '.result', 'on', false); },
+      play: function (r) {
+        var n = qa(r, '.node'), a = qa(r, '.arrow');
+        at(300, function () { n[0].classList.add('on'); });
+        at(700, function () { a[0].classList.add('go'); });
+        at(1600, function () { n[1].classList.add('on'); });
+        at(2000, function () { a[1].classList.add('go'); });
+        at(2900, function () { n[2].classList.add('on'); });
+        at(3500, function () { a[1].classList.remove('go'); void a[1].offsetWidth; a[1].classList.add('back'); });
+        at(4300, function () { a[0].classList.remove('go'); void a[0].offsetWidth; a[0].classList.add('back'); });
+        at(5200, function () { q(r, '.result').classList.add('on'); });
+      },
+      final: function (r) { all(r, '.node', 'on', true); all(r, '.result', 'on', true); }
+    },
+    devices: {
+      period: 7000,
+      reset: function (r) { all(r, '.br', 'show', false); all(r, '.ph', 'show', false); },
+      play: function (r) { at(800, function () { q(r, '.br').classList.add('show'); }); at(1700, function () { q(r, '.ph').classList.add('show'); }); },
+      final: function (r) { all(r, '.br', 'show', true); all(r, '.ph', 'show', true); }
+    },
+    sso: {
+      period: 8500,
+      reset: function (r) { chainClear(r); },
+      play: function (r) { chain(q(r, '.rowA'), 300); chain(q(r, '.rowB'), 3800); },
+      final: function (r) { all(r, '.node', 'on', true); }
+    },
+    hub: {
+      period: 6500,
+      reset: function (r) { all(r, '.hub', 'joined', false); },
+      play: function (r) { at(1000, function () { q(r, '.hub').classList.add('joined'); }); },
+      final: function (r) { all(r, '.hub', 'joined', true); }
+    },
+    cats: {
+      period: 6500,
+      reset: function (r) { all(r, '.cat', 'on', false); },
+      play: function (r) { qa(r, '.cat').forEach(function (e, i) { at(300 + i * 700, function () { e.classList.add('on'); }); }); },
+      final: function (r) { all(r, '.cat', 'on', true); }
+    },
+    shots: {
+      step: 3000,
+      init: function (r) {
+        if (r._frames) return r._frames;
+        var frames = JSON.parse(r.getAttribute('data-frames'));
+        var shot = q(r, '.shot'), dots = q(r, '.dots');
+        var W = Number(r.getAttribute('data-w')) || 1427, H = Number(r.getAttribute('data-h')) || 718;
+        shot.style.setProperty('--ar', W + ' / ' + H); shot.style.setProperty('--arn', String(W / H));
+        frames.forEach(function (f, i) {
+          var img = document.createElement('img');
+          img.src = f.src; img.alt = f.cap; img.decoding = 'async';
+          shot.appendChild(img); f.img = img;
+          f.boxes = (f.box || []).map(function (b) {
+            var el = document.createElement('i');
+            el.className = 'hl';
+            el.style.left = (b[0] / W * 100) + '%'; el.style.top = (b[1] / H * 100) + '%';
+            el.style.width = (b[2] / W * 100) + '%'; el.style.height = (b[3] / H * 100) + '%';
+            shot.appendChild(el); return el;
+          });
+          f.dot = document.createElement('i'); dots.appendChild(f.dot);
+        });
+        r._frames = frames;
+        return frames;
+      },
+      show: function (r, i, boxes) {
+        r._frames.forEach(function (f, k) {
+          f.img.classList.toggle('on', k === i); f.dot.classList.toggle('on', k === i);
+          f.boxes.forEach(function (b) { b.classList.toggle('on', k === i && boxes); });
+        });
+        q(r, '.cap').textContent = r._frames[i].cap;
+      },
+      reset: function (r) { scenes.shots.init(r); scenes.shots.show(r, 0, false); },
+      play: function (r) {
+        var s = scenes.shots;
+        r._frames.forEach(function (_, i) {
+          at(i * s.step, function () { s.show(r, i, false); });
+          at(i * s.step + 500, function () { s.show(r, i, true); });
+        });
+      },
+      final: function (r) { var s = scenes.shots; s.init(r); s.show(r, r._frames.length - 1, true); },
+      periodOf: function (r) { return scenes.shots.init(r).length * scenes.shots.step + 800; }
+    },
+    notify: {
+      period: 8000,
+      reset: function (r) {
+        all(r, '.evt', 'on', false); all(r, '.badge', 'on', false); all(r, '.toast', 'on', false); all(r, '.banner', 'on', false);
+        all(r, '.nitem.new', 'off', true);
+      },
+      play: function (r) {
+        at(400, function () { q(r, '.evt').classList.add('on'); });
+        at(1400, function () { q(r, '.badge').classList.add('on'); q(r, '.toast').classList.add('on'); q(r, '.banner').classList.add('on'); });
+        at(4200, function () { q(r, '.toast').classList.remove('on'); q(r, '.nitem.new').classList.remove('off'); });
+      },
+      final: function (r) { all(r, '.evt', 'on', true); all(r, '.badge', 'on', true); all(r, '.banner', 'on', true); all(r, '.nitem.new', 'off', false); }
+    },
+    dash: {
+      period: 6500,
+      reset: function (r) { all(r, '.dc', 'on', false); },
+      play: function (r) { qa(r, '.dc').forEach(function (e, i) { at(300 + i * 450, function () { e.classList.add('on'); }); }); },
+      final: function (r) { all(r, '.dc', 'on', true); }
+    },
+    mods: {
+      period: 6500,
+      reset: function (r) { all(r, '.mod', 'on', false); },
+      play: function (r) { qa(r, '.mod').forEach(function (e, i) { at(300 + i * 450, function () { e.classList.add('on'); }); }); },
+      final: function (r) { all(r, '.mod', 'on', true); }
+    },
+    om: {
+      period: 7000,
+      reset: function (r) { all(r, '.t9', 'on', false); },
+      play: function (r) { qa(r, '.t9').forEach(function (e, i) { at(300 + i * 280, function () { e.classList.add('on'); }); }); },
+      final: function (r) { all(r, '.t9', 'on', true); }
+    }
+  };
+
+  function startScene(slide) {
+    stop();
+    var s = scenes[slide.getAttribute('data-scene')];
+    if (!s) return;
+    if (reduced) { s.reset(slide); s.final(slide); return; }
+    var period = s.periodOf ? s.periodOf(slide) : s.period;
+    (function loop() { s.reset(slide); s.play(slide); at(period, loop); })();
+  }
+
+  // 부록: 전체 화면 목록 (메뉴 순서). [파일, 화면명, 화면 코드 또는 경로, 하위 메뉴]
+  var ALL = [
+    ['로그인', [['01-login', '로그인', '/login']]],
+    ['Management', [['02-home', 'Home', '/home'], ['03-users', 'Users', '/users'], ['04-roles', 'Roles', '/roles'], ['05-menus', 'Menus', '/Common/menus'], ['06-content', 'Content', '/Common/ContentsEditor']]],
+    ['System', [['07-error-log', '오류 로그 관리', '/error-log']]],
+    ['대시보드', [['08-dash-closing', '재고마감 대시보드', 'InventoryClosing'], ['09-dash-cancel', '재고마감 취소요청 이력', 'InventoryClosingCancelHistory'], ['10-dash-sales', '영업 대시보드', 'SalesDashboard'], ['11-dash-purchase', '구매 대시보드', 'PurchaseDashboard']]],
+    ['Office Management', [
+      ['12-OM001M1', '사원증 발급 신청', 'OM001M1'], ['13-OM001M2', '사원증 발급 신청 관리', 'OM001M2'], ['14-OM003M1', '회의실 예약', 'OM003M1'],
+      ['15-OM004M1', '근무복 신청', 'OM004M1'], ['16-OM004M2', '근무복 신청 관리', 'OM004M2'], ['17-OM005M1', '차량등록 신청', 'OM005M1'], ['18-OM005M2', '차량등록 신청 관리', 'OM005M2'],
+      ['19-OM006M1', '외부 방문객 신청', 'OM006M1'], ['20-OM006M2', '외부 방문객 관리', 'OM006M2'], ['21-OM007M1', '명함 신청', 'OM007M1'], ['22-OM007M2', '명함 신청 관리', 'OM007M2'],
+      ['23-OM008M1', '사무소모품 신청', 'OM008M1'], ['24-OM008M2', '사무소모품 신청 관리', 'OM008M2'], ['25-OM009M1', '영선(비품수선) 신청', 'OM009M1'], ['26-OM009M2', '영선(비품수선) 신청 관리', 'OM009M2'],
+      ['27-OM011M1', '축구 티켓 신청', 'OM011M1'], ['28-OM011M2', '축구 티켓 신청 관리', 'OM011M2']]],
+    ['Web4ERP', [
+      ['31-ItemInfoRegistration', '품목정보등록', 'ItemInfoRegistration', '기준정보'], ['32-ItemInfoMultiRegistration', '품목정보등록(Multi)', 'ItemInfoMultiRegistration', '기준정보'],
+      ['33-StockLedgerInquiry', '수불장조회', 'StockLedgerInquiry', '재고관리'], ['34-I2331QA5', '기간별수불현황조회', 'I2331QA5', '재고관리'], ['35-I2351QA1', '기간별재고현황', 'I2351QA1', '재고관리'],
+      ['36-SoStatusInquiry', '수주현황조회', 'SoStatusInquiry', '영업관리'], ['37-S3112QA1', '수주상세조회', 'S3112QA1', '영업관리'], ['38-S4512QA1', '출하요청상세조회', 'S4512QA1', '영업관리'],
+      ['39-S4111MA8', '출하현황조회', 'S4111MA8', '영업관리'], ['40-S4112QA1', '출하상세조회', 'S4112QA1', '영업관리'], ['41-S3112GA1', '미출고집계조회', 'S3112GA1', '영업관리'],
+      ['42-S5111MA8', '매출채권현황조회', 'S5111MA8', '영업관리'], ['43-S5112QA1', '매출채권상세조회', 'S5112QA1', '영업관리'], ['44-S3113MA9', '미매출채권현황조회', 'S3113MA9', '영업관리'],
+      ['45-P4113MA1', '제조오더현황조회', 'P4113MA1', '생산관리'], ['46-P4513MA1', '생산입고현황조회', 'P4513MA1', '생산관리'], ['47-P4430MA1', '공정별실적조회', 'P4430MA1', '생산관리'], ['48-P4425MA1', '오더별실적조회', 'P4425MA1', '생산관리'],
+      ['49-M2111QA3', '구매요청집계조회', 'M2111QA3', '구매관리'], ['50-M2111QA4', '구매요청상세조회', 'M2111QA4', '구매관리'], ['51-M3111QA1', '발주집계조회', 'M3111QA1', '구매관리'],
+      ['52-M3111QA2', '발주상세조회', 'M3111QA2', '구매관리'], ['53-M4513QA1', '수입진행현황조회', 'M4513QA1', '구매관리'], ['54-M4111QA5', '입고집계조회', 'M4111QA5', '구매관리'],
+      ['55-M4111QA6', '입고상세조회', 'M4111QA6', '구매관리'], ['56-M3112QA4', '미입고상세조회', 'M3112QA4', '구매관리'], ['57-M3113QA2', '미입고통관상세조회', 'M3113QA2', '구매관리'],
+      ['58-M5111QA1', '매입내역집계조회', 'M5111QA1', '구매관리'], ['59-M5111QA2', '매입내역상세조회', 'M5111QA2', '구매관리'], ['60-M5114QA2', '미매입입고상세조회', 'M5114QA2', '구매관리']]],
+    ['Sign', [['61-Sign01', 'Sign01', 'Sign01']]],
+    ['알림 · 프로필', [['62-notifications', '알림', '/notifications'], ['63-profile', '프로필', '/Common/profile']]]
+  ];
+  (function buildAll() {
+    var toc = document.getElementById('alltoc'), box = document.getElementById('allpages'), html = '', tocHtml = '', no = 0;
+    ALL.forEach(function (g, gi) {
+      var id = 'grp' + gi;
+      tocHtml += '<a href="#' + id + '" data-target="' + id + '">' + g[0] + '<b>' + g[1].length + '</b></a>';
+      html += '<section class="allgroup" id="' + id + '"><h3>' + g[0] + '<span>' + g[1].length + '개</span></h3>';
+      g[1].forEach(function (p) {
+        html += '<article class="pagecard"><header><span class="no">' + String(++no).padStart(2, '0') + '</span><b>' + p[1] + '</b>' +
+          (p[3] ? '<span class="sub">' + p[3] + '</span>' : '') + '<code>' + p[2] + '</code></header>' +
+          '<img src="pages/' + p[0] + '.jpg" alt="' + p[1] + ' 화면" loading="lazy" decoding="async" width="1520" height="783"></article>';
+      });
+      html += '</section>';
+    });
+    toc.innerHTML = tocHtml; box.innerHTML = html;
+    // 목차는 해시 대신 슬라이드 안에서 스크롤 이동
+    toc.addEventListener('click', function (e) {
+      var a = e.target.closest('a'); if (!a) return;
+      e.preventDefault();
+      var t = document.getElementById(a.getAttribute('data-target'));
+      var s = document.getElementById('s18');
+      s.scrollTop = t.offsetTop - 16;
+    });
+  })();
+
+  var secEl = document.getElementById('sec'), countEl = document.getElementById('count');
+  var prog = document.getElementById('prog'), prev = document.getElementById('prev'), next = document.getElementById('next');
+
+  function go(n, silent) {
+    n = Math.max(0, Math.min(slides.length - 1, n));
+    if (n === cur) return;
+    if (cur >= 0) slides[cur].classList.remove('active');
+    cur = n;
+    var s = slides[cur];
+    s.classList.add('active'); s.scrollTop = 0;
+    secEl.textContent = s.getAttribute('data-sec') || '';
+    countEl.textContent = (cur + 1) + ' / ' + slides.length;
+    prog.style.width = ((cur + 1) / slides.length * 100) + '%';
+    prev.disabled = cur === 0; next.disabled = cur === slides.length - 1;
+    startScene(s);
+    if (!silent) { try { history.replaceState(null, '', '#s' + (cur + 1)); } catch (e) {} }
+  }
+
+  prev.addEventListener('click', function () { go(cur - 1); });
+  next.addEventListener('click', function () { go(cur + 1); });
+  document.addEventListener('keydown', function (e) {
+    // 스크롤 페이지에서는 Space/PageUp/PageDown/Home/End를 스크롤에 맡긴다
+    if (slides[cur].classList.contains('scrolly') && /^( |PageDown|PageUp|Home|End)$/.test(e.key)) return;
+    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); go(cur + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(cur - 1); }
+    else if (e.key === 'Home') go(0);
+    else if (e.key === 'End') go(slides.length - 1);
+  });
+  var sx = null, sy = null;
+  stage.addEventListener('pointerdown', function (e) { sx = e.clientX; sy = e.clientY; });
+  stage.addEventListener('pointerup', function (e) {
+    if (sx === null) return;
+    var dx = e.clientX - sx, dy = e.clientY - sy; sx = null;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) go(cur + (dx < 0 ? 1 : -1));
+  });
+  document.getElementById('full').addEventListener('click', function () {
+    try {
+      var p = stage.requestFullscreen && stage.requestFullscreen();
+      if (p && p.catch) p.catch(function () {});
+    } catch (e) {}
+  });
+
+  var m = /^#s(\d+)$/.exec(location.hash || '');
+  go(m ? Number(m[1]) - 1 : 0, true);
+})();
+</script>
+
+</html>
